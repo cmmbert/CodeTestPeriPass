@@ -18,45 +18,17 @@ internal class Program
         HashSet<string> partsSet = File.ReadLines(inputFilePath).ToHashSet();
         //Order alphabetically and length and convert to list for easier manipulation
         parts = partsSet.OrderBy(x => x).ThenBy(x => x.Length).ToList();
-        for (int i = 0; i < parts.Count - 1; i++)
+        List<string> words = parts.Where(x => x.Length == combinationLength).ToList();
+        foreach (var word in words)
         {
-            foreach (var combi in FindCombinationsWithPart(i, parts))
+            foreach (var combi in FindCombinationsOfWord(word, parts))
             {
-                if(combinations.Add(combi))
-                    Console.WriteLine(combi);
+                if (combi.Length != combinationLength && combinations.Add(combi))
+                    Console.WriteLine($"{combi}={word}");
             }
         }
         watch.Stop();
         Console.WriteLine($"Found {combinations.Count} combinations in {watch.ElapsedMilliseconds}ms");
-    }
-
-    private static HashSet<string> FindCombinationsWithPart(int partIndex, List<string> parts)
-    {
-        var part = parts[partIndex];
-        if (part.Length >= combinationLength)
-            return new(); //part is too long to make a combination
-        var combinations = new HashSet<string>();
-        int partNeighbourOffset = 1;
-        string neighbourPart = parts[partIndex + partNeighbourOffset];
-        while (neighbourPart.StartsWith(part))
-        {
-            if (neighbourPart.Length == combinationLength)
-            {
-                string secondHalf = neighbourPart.Substring(part.Length, combinationLength - part.Length);
-                if (parts.Contains(secondHalf))
-                {
-                    string combi = $"{part}+{secondHalf}={neighbourPart}";
-                    combinations.Add(combi);
-                }
-                foreach (var combi in FindCombinationsOfWord(secondHalf, parts))
-                    combinations.Add($"{part}+{combi}={neighbourPart}");
-            }
-            partNeighbourOffset++;
-            if (partIndex + partNeighbourOffset >= parts.Count - 1)
-                break;
-            neighbourPart = parts[partIndex + partNeighbourOffset];
-        }
-        return combinations;
     }
 
     private static HashSet<string> FindCombinationsOfWord(string word, List<string> parts)
@@ -67,22 +39,24 @@ internal class Program
             combinations.Add(word);
             return combinations;
         }
-        List<string> wordParts = new();
+        List<string> filteredParts = new();
         foreach (var part in parts)
         {
             if (word.Contains(part))
-                wordParts.Add(part);
+                filteredParts.Add(part);
         }
-        foreach (var wordPart in wordParts)
+        foreach (var wordPart in filteredParts)
         {
             if (!word.StartsWith(wordPart))
                 continue;
             string remainingWord = word.Substring(wordPart.Length);
             if (string.IsNullOrEmpty(remainingWord))
+            {
                 combinations.Add(wordPart);
-            else
-                foreach (var combi in FindCombinationsOfWord(remainingWord, wordParts))
-                    combinations.Add($"{word.Substring(0, wordPart.Length)}+{combi}");
+                continue;
+            }
+            foreach (var combi in FindCombinationsOfWord(remainingWord, filteredParts))
+                combinations.Add($"{word.Substring(0, wordPart.Length)}+{combi}");
         }
         return combinations;
     }
