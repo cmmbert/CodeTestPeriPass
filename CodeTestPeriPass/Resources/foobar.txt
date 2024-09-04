@@ -3,3 +3,8 @@ fo
 bar
 foo
 obar
+o
+a
+r
+b
+f
