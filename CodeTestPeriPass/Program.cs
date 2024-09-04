@@ -1,5 +1,7 @@
-﻿const int combinationLength = 6;
-const string inputFilePath = "Resources/foobar.txt";
+﻿using System.Diagnostics;
+
+const int combinationLength = 6;
+const string inputFilePath = "Resources/input.txt";
 
 if (!File.Exists(inputFilePath))
 {
@@ -7,9 +9,11 @@ if (!File.Exists(inputFilePath))
     return;
 }
 
+var watch = Stopwatch.StartNew();
 //HashSet to get rid of duplicate values;
 HashSet<string> partsSet = File.ReadLines(inputFilePath).ToHashSet();
-List<string> parts = partsSet.OrderBy(x => x).ThenBy(x => x.Length).ToList(); //Order alphabetically and length and convert to list for easier manipulation
+//Order alphabetically and length and convert to list for easier manipulation
+List<string> parts = partsSet.OrderBy(x => x).ThenBy(x => x.Length).ToList(); 
 for (int i = 0; i < parts.Count-1; i++)
 {
     var part = parts[i];
@@ -31,4 +35,5 @@ for (int i = 0; i < parts.Count-1; i++)
         currentWord = parts[i + partIndexOffset];
     }
 }
-return;
+watch.Stop();
+Console.WriteLine(watch.ElapsedMilliseconds);
